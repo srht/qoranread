@@ -1,101 +1,99 @@
-// Her kelimede:
-//   arabic      → Arapça kelime (mushaf imlası)
-//   turkish     → Türkçe karşılık (kelime kelime)
-//   turkishOrder → Türkçe cümledeki sıra numarası (1 = ilk)
-//   color       → Renk (Arapça ve Türkçe eşleşmesi için aynı)
+// Veri yapısı:
+// ar:  Arapça kelimeler (Arapça okuma sırasında, sağdan sola)
+// tr:  Türkçe kelimeler (Türkçe cümle sırasında, soldan sağa)
+//      ref → ar dizisindeki karşılık gelen kelime indeksi
+//      ref = null → bağlaç/yardımcı kelime (renksiz)
 
-const C = [
-  '#ff6b6b', // kırmızı
-  '#4ecdc4', // deniz mavisi
-  '#ffd93d', // sarı
-  '#6bcb77', // yeşil
-  '#a78bfa', // mor
-  '#fb923c', // turuncu
-  '#60a5fa', // mavi
-  '#f472b6', // pembe
-  '#34d399', // zümrüt
-  '#fbbf24', // altın
-  '#c4b5fd', // lila
-  '#86efac', // açık yeşil
-];
-
-export const fatiha = {
-  number: 1,
-  arabicName: 'الْفَاتِحَة',
-  turkishName: 'Fâtiha Sûresi',
-  verseCount: 7,
-  revelation: 'Mekkî',
+export const surah = {
+  name: 'Fâtiha',
+  arabicName: 'ٱلْفَاتِحَة',
+  meaning: 'Açılış Sûresi',
   verses: [
     {
-      number: 1,
-      // "Allah'ın Rahman'ın Rahim'in adıyla"
-      words: [
-        { arabic: 'بِسْمِ',        turkish: 'adıyla',      turkishOrder: 4, color: C[0] },
-        { arabic: 'ٱللَّهِ',       turkish: "Allah'ın",    turkishOrder: 1, color: C[1] },
-        { arabic: 'ٱلرَّحْمَٰنِ', turkish: "Rahman'ın",   turkishOrder: 2, color: C[2] },
-        { arabic: 'ٱلرَّحِيمِ',   turkish: "Rahim'in",    turkishOrder: 3, color: C[3] },
+      n: 1,
+      ar: ['بِسْمِ', 'ٱللَّهِ', 'ٱلرَّحْمَٰنِ', 'ٱلرَّحِيمِ'],
+      tr: [
+        { ref: 2,    text: 'Rahmân' },
+        { ref: null, text: 've' },
+        { ref: 3,    text: 'Rahîm' },
+        { ref: null, text: 'olan' },
+        { ref: 1,    text: "Allah'ın" },
+        { ref: 0,    text: 'adıyla' },
       ],
     },
     {
-      number: 2,
-      // "Hamd, âlemlerin Rabbi Allah'a"
-      words: [
-        { arabic: 'ٱلْحَمْدُ',     turkish: 'Hamd',         turkishOrder: 1, color: C[0] },
-        { arabic: 'لِلَّهِ',       turkish: "Allah'a",       turkishOrder: 4, color: C[1] },
-        { arabic: 'رَبِّ',         turkish: "Rabb'i",        turkishOrder: 3, color: C[2] },
-        { arabic: 'ٱلْعَٰلَمِينَ', turkish: 'âlemlerin',    turkishOrder: 2, color: C[3] },
+      n: 2,
+      ar: ['ٱلْحَمْدُ', 'لِلَّهِ', 'رَبِّ', 'ٱلْعَٰلَمِينَ'],
+      tr: [
+        { ref: 0,    text: 'Hamd' },
+        { ref: null, text: ',' },
+        { ref: 3,    text: 'âlemlerin' },
+        { ref: 2,    text: 'Rabbi' },
+        { ref: 1,    text: "Allah'a mahsustur" },
       ],
     },
     {
-      number: 3,
-      // "Rahman, Rahim"  (aynı sıra)
-      words: [
-        { arabic: 'ٱلرَّحْمَٰنِ', turkish: 'Rahman', turkishOrder: 1, color: C[0] },
-        { arabic: 'ٱلرَّحِيمِ',   turkish: 'Rahim',   turkishOrder: 2, color: C[1] },
+      n: 3,
+      ar: ['ٱلرَّحْمَٰنِ', 'ٱلرَّحِيمِ'],
+      tr: [
+        { ref: null, text: '(O)' },
+        { ref: 0,    text: 'Rahmân' },
+        { ref: null, text: 've' },
+        { ref: 1,    text: "Rahîm'dir" },
       ],
     },
     {
-      number: 4,
-      // "din gününün sahibi"
-      words: [
-        { arabic: 'مَٰلِكِ',    turkish: 'sahibi',   turkishOrder: 3, color: C[0] },
-        { arabic: 'يَوْمِ',     turkish: 'gününün',  turkishOrder: 2, color: C[1] },
-        { arabic: 'ٱلدِّينِ',   turkish: 'din',      turkishOrder: 1, color: C[2] },
+      n: 4,
+      ar: ['مَٰلِكِ', 'يَوْمِ', 'ٱلدِّينِ'],
+      tr: [
+        { ref: 2, text: 'Din' },
+        { ref: 1, text: 'gününün' },
+        { ref: 0, text: 'sâhibidir' },
       ],
     },
     {
-      number: 5,
-      // "Yalnız sana ibadet eder, ve yalnız senden yardım dileriz"  (aynı sıra)
-      words: [
-        { arabic: 'إِيَّاكَ',    turkish: 'Yalnız sana',        turkishOrder: 1, color: C[0] },
-        { arabic: 'نَعْبُدُ',    turkish: 'ibadet ederiz',      turkishOrder: 2, color: C[1] },
-        { arabic: 'وَإِيَّاكَ',  turkish: 've yalnız senden',   turkishOrder: 3, color: C[2] },
-        { arabic: 'نَسْتَعِينُ', turkish: 'yardım isteriz',     turkishOrder: 4, color: C[3] },
+      n: 5,
+      ar: ['إِيَّاكَ', 'نَعْبُدُ', 'وَإِيَّاكَ', 'نَسْتَعِينُ'],
+      tr: [
+        { ref: 0,    text: 'Yalnız sana' },
+        { ref: 1,    text: 'ibadet ederiz' },
+        { ref: null, text: ',' },
+        { ref: 2,    text: 've yalnız senden' },
+        { ref: 3,    text: 'yardım dileriz' },
       ],
     },
     {
-      number: 6,
-      // "Bizi doğru yola ilet"
-      words: [
-        { arabic: 'ٱهْدِنَا',      turkish: 'Bizi ilet',  turkishOrder: 1, color: C[0] },
-        { arabic: 'ٱلصِّرَٰطَ',    turkish: 'yola',       turkishOrder: 3, color: C[1] },
-        { arabic: 'ٱلْمُسْتَقِيمَ', turkish: 'doğru',      turkishOrder: 2, color: C[2] },
+      n: 6,
+      ar: ['ٱهْدِنَا', 'ٱلصِّرَٰطَ', 'ٱلْمُسْتَقِيمَ'],
+      tr: [
+        { ref: 2, text: 'Dosdoğru' },
+        { ref: 1, text: 'yola' },
+        { ref: 0, text: 'bizi ilet' },
       ],
     },
     {
-      number: 7,
-      // "nimetlendirdiğin kimselerin yoluna onlara;
-      //  gazaba uğrayanların onlara ve sapıtanların değil"
-      words: [
-        { arabic: 'صِرَٰطَ',        turkish: 'yoluna',               turkishOrder: 3, color: C[0] },
-        { arabic: 'ٱلَّذِينَ',      turkish: 'kimselerin',            turkishOrder: 2, color: C[1] },
-        { arabic: 'أَنْعَمْتَ',     turkish: 'nimetlendirdiğin',      turkishOrder: 1, color: C[2] },
-        { arabic: 'عَلَيْهِمْ',     turkish: 'onlara',                turkishOrder: 4, color: C[3] },
-        { arabic: 'غَيْرِ',         turkish: 'değil',                 turkishOrder: 9, color: C[4] },
-        { arabic: 'ٱلْمَغْضُوبِ',   turkish: 'gazaba uğrayanların',   turkishOrder: 5, color: C[5] },
-        { arabic: 'عَلَيْهِمْ',     turkish: 'onlara',                turkishOrder: 6, color: C[6] },
-        { arabic: 'وَلَا',          turkish: 've',                    turkishOrder: 7, color: C[7] },
-        { arabic: 'ٱلضَّآلِّينَ',   turkish: 'sapıtanların',          turkishOrder: 8, color: C[8] },
+      n: 7,
+      ar: [
+        'صِرَٰطَ',
+        'ٱلَّذِينَ',
+        'أَنْعَمْتَ',
+        'عَلَيْهِمْ',
+        'غَيْرِ',
+        'ٱلْمَغْضُوبِ',
+        'عَلَيْهِمْ',
+        'وَلَا',
+        'ٱلضَّآلِّينَ',
+      ],
+      tr: [
+        { ref: 3,    text: 'Kendilerine' },
+        { ref: 2,    text: 'nimet verdiğin' },
+        { ref: 1,    text: 'kimselerin' },
+        { ref: 0,    text: 'yoluna' },
+        { ref: null, text: ';' },
+        { ref: 5,    text: 'gazaba uğramışların' },
+        { ref: 7,    text: 've' },
+        { ref: 8,    text: 'sapmışların' },
+        { ref: 4,    text: 'yoluna değil' },
       ],
     },
   ],
