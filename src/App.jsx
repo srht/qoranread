@@ -1,11 +1,37 @@
-import React, { useState } from 'react';
-import { surah } from './data/fatiha';
-import SurahHeader from './components/SurahHeader';
-import VerseDisplay from './components/VerseDisplay';
-import Ornament from './components/Ornament';
+import { useEffect, useState } from 'react';
+import SurahList from './components/SurahList';
+import FatihaWordView from './components/FatihaWordView';
+import SurahMeaningView from './components/SurahMeaningView';
+
+function parseRoute() {
+  const hash = window.location.hash.replace(/^#/, '');
+  const m = hash.match(/^\/surah\/(\d+)$/);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    if (n >= 1 && n <= 114) return { name: 'surah', number: n };
+  }
+  return { name: 'list' };
+}
 
 export default function App() {
-  const [hovered, setHovered] = useState(null);
+  const [route, setRoute] = useState(parseRoute);
+
+  useEffect(() => {
+    const onHash = () => setRoute(parseRoute());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  // Sayfa değişiminde yukarı kaydır
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [route.name, route.number]);
+
+  const navigate = (path) => {
+    window.location.hash = path;
+  };
+
+  const goBack = () => navigate('/');
 
   return (
     <div
@@ -17,44 +43,17 @@ export default function App() {
         paddingRight: '1rem',
       }}
     >
-      <SurahHeader surah={surah} />
+      {route.name === 'list' && (
+        <SurahList onSelect={(n) => navigate(`/surah/${n}`)} />
+      )}
 
-      <main className="relative z-10">
-        {surah.verses.map((verse, vi) => (
-          <React.Fragment key={vi}>
-            <VerseDisplay
-              verse={verse}
-              vIdx={vi}
-              hovered={hovered}
-              setHovered={setHovered}
-            />
-            {vi < surah.verses.length - 1 && <Ornament />}
-          </React.Fragment>
-        ))}
-      </main>
+      {route.name === 'surah' && route.number === 1 && (
+        <FatihaWordView onBack={goBack} />
+      )}
 
-      <footer
-        className="text-center relative z-10"
-        style={{
-          fontFamily: '"Cormorant Garamond", serif',
-          fontSize: '0.95rem',
-          fontStyle: 'italic',
-          color: '#8a7355',
-          marginTop: '4rem',
-          letterSpacing: '0.05em',
-        }}
-      >
-        <div className="flex justify-center mb-3">
-          <svg width="80" height="14" viewBox="0 0 80 14">
-            <g stroke="#B8860B" strokeWidth="0.6" fill="none" opacity="0.5">
-              <line x1="0"  y1="7" x2="30" y2="7" />
-              <line x1="50" y1="7" x2="80" y2="7" />
-              <circle cx="40" cy="7" r="2" fill="#B8860B" />
-            </g>
-          </svg>
-        </div>
-        <p>Bir kelimeye dokunun · aynı renkteki Türkçe karşılığı belirir</p>
-      </footer>
+      {route.name === 'surah' && route.number !== 1 && (
+        <SurahMeaningView number={route.number} onBack={goBack} />
+      )}
     </div>
   );
 }
