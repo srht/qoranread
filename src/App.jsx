@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import SurahList from './components/SurahList';
 import FatihaWordView from './components/FatihaWordView';
-import SurahMeaningView from './components/SurahMeaningView';
+import SurahWordView from './components/SurahWordView';
 
 function parseRoute() {
   const hash = window.location.hash.replace(/^#/, '');
@@ -52,7 +52,7 @@ export default function App() {
       )}
 
       {route.name === 'surah' && route.number !== 1 && (
-        <SurahMeaningView number={route.number} onBack={goBack} />
+        <SurahWordView number={route.number} onBack={goBack} />
       )}
     </div>
   );
