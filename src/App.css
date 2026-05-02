@@ -4,205 +4,52 @@
   padding: 0;
 }
 
-:root {
-  --bg:        #0c0f18;
-  --bg-card:   #131724;
-  --bg-hover:  #1a1f30;
-  --border:    #1f2537;
-  --gold:      #c9a84c;
-  --gold-dim:  #8a6f30;
-  --text:      #dde4f0;
-  --text-muted:#5a6480;
-}
-
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  min-height: 100vh;
-  line-height: 1.6;
+  margin: 0;
 }
 
-/* ─── Layout ─────────────────────────────────────────── */
+/* ─── Utility classes ─────────────────────────────────── */
 
-.app {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 5rem;
+.flex          { display: flex; }
+.inline-block  { display: inline-block; }
+.items-center  { align-items: center; }
+.justify-center{ justify-content: center; }
+.text-center   { text-align: center; }
+.relative      { position: relative; }
+.absolute      { position: absolute; }
+.inset-0       { inset: 0; }
+.z-10          { z-index: 10; }
+.mx-auto       { margin-left: auto; margin-right: auto; }
+.min-h-screen  { min-height: 100vh; }
+.cursor-pointer{ cursor: pointer; }
+.mb-3          { margin-bottom: 0.75rem; }
+.mb-6          { margin-bottom: 1.5rem; }
+.mb-12         { margin-bottom: 3rem; }
+.mt-6          { margin-top: 1.5rem; }
+.my-2          { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+
+/* ─── Parchment background ────────────────────────────── */
+
+.parchment {
+  background-color: #F5EBD3;
+  background-image:
+    radial-gradient(ellipse at 20% 0%,   #FAF2DC 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, #EFDFB8 0%, transparent 55%),
+    radial-gradient(circle  at 50% 50%,  #F5EBD3 0%, #E8D8AF    100%);
+  position: relative;
 }
 
-/* ─── Surah Header ────────────────────────────────────── */
-
-.surah-header {
-  text-align: center;
-  padding: 3rem 2rem 2.5rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
-}
-
-.surah-ornament {
-  font-family: 'Amiri', serif;
-  font-size: 2.25rem;
-  color: var(--gold);
-  opacity: 0.65;
-  margin-bottom: 1.25rem;
-  letter-spacing: 0.05em;
-}
-
-.surah-name-arabic {
-  font-family: 'Amiri', serif;
-  font-size: 3.75rem;
-  color: var(--gold);
-  line-height: 1.1;
-  margin-bottom: 0.6rem;
-}
-
-.surah-name-turkish {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.35rem;
-  letter-spacing: 0.04em;
-}
-
-.surah-meta {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* ─── Verse ───────────────────────────────────────────── */
-
-.verses {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.verse {
-  display: flex;
-  gap: 1.25rem;
-  padding: 1.5rem 1.75rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.verse:hover {
-  border-color: #2a3050;
-  background: var(--bg-hover);
-}
-
-/* Verse number badge */
-.verse-num {
-  flex-shrink: 0;
-  padding-top: 0.6rem;
-}
-
-.verse-num span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  border: 1px solid var(--gold-dim);
-  color: var(--gold);
-  font-size: 0.72rem;
-  font-weight: 600;
-  opacity: 0.7;
-  user-select: none;
-}
-
-/* Content area */
-.verse-body {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ─── Arabic line ─────────────────────────────────────── */
-
-.arabic-line {
-  direction: rtl;
-  font-family: 'Amiri', serif;
-  font-size: 2.1rem;
-  line-height: 1.9;
-  margin-bottom: 1rem;
-  word-spacing: 0.15em;
-}
-
-.arabic-word {
-  display: inline;
-  cursor: default;
-  transition: opacity 0.15s, text-shadow 0.15s;
-}
-
-.arabic-word::after {
-  /* küçük boşluk ekler, kelimeler bitişmesin */
-  content: '\00a0';
-}
-
-/* ─── Turkish line ────────────────────────────────────── */
-
-.turkish-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.turkish-word {
-  display: inline-block;
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 3px 9px;
-  border-radius: 5px;
-  border: 1px solid transparent;
-  cursor: default;
-  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
-  user-select: none;
-}
-
-/* ─── Legend ─────────────────────────────────────────── */
-
-.legend {
-  margin-top: 2rem;
-  padding: 1rem 1.25rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.legend p {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  line-height: 1.65;
-}
-
-.legend strong {
-  color: var(--gold);
-  font-weight: 600;
-}
-
-/* ─── Responsive ──────────────────────────────────────── */
-
-@media (max-width: 600px) {
-  .app {
-    padding: 1.5rem 1rem 4rem;
-  }
-
-  .surah-name-arabic {
-    font-size: 2.75rem;
-  }
-
-  .arabic-line {
-    font-size: 1.75rem;
-  }
-
-  .verse {
-    padding: 1.25rem;
-    gap: 0.9rem;
-  }
+/* Subtle texture overlay */
+.parchment::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 30%, #00000010 0%, transparent 1%),
+    radial-gradient(circle at 75% 70%, #00000008 0%, transparent 1.5%),
+    radial-gradient(circle at 40% 80%, #00000010 0%, transparent 1%);
+  background-size: 90px 90px, 130px 130px, 70px 70px;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
 }
