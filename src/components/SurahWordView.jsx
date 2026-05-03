@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchSurahWords } from '../api/quranWords';
+import { fetchSurahWordsPage } from '../api/quranWords';
 import { fetchSurah } from '../api/quran';
 import { getSurahMeta } from '../data/surahList';
 import VerseWordByWord from './VerseWordByWord';
@@ -7,6 +7,7 @@ import Ornament from './Ornament';
 import BackBar from './BackBar';
 
 const BISMILLAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+const PAGE_SIZE = 50;
 
 function HeaderOrnament() {
   return (
@@ -94,7 +95,7 @@ function Bismillah() {
   );
 }
 
-function Loading() {
+function Loading({ text = 'Sûre yükleniyor…' }) {
   return (
     <div
       className="text-center relative z-10"
@@ -105,7 +106,7 @@ function Loading() {
         padding: '3rem 0',
       }}
     >
-      <p>Sûre yükleniyor…</p>
+      <p>{text}</p>
     </div>
   );
 }
@@ -145,34 +146,100 @@ function ErrorMsg({ message, onRetry }) {
   );
 }
 
+function LoadMoreButton({ onClick, loading, loadedCount, totalCount }) {
+  return (
+    <div
+      className="text-center relative z-10"
+      style={{ padding: '2.5rem 0 1rem' }}
+    >
+      <p
+        style={{
+          fontFamily: '"Cormorant Garamond", serif',
+          fontStyle: 'italic',
+          color: '#8a7355',
+          fontSize: '0.9rem',
+          marginBottom: '1rem',
+        }}
+      >
+        {loadedCount} / {totalCount} âyet gösteriliyor
+      </p>
+      <button
+        onClick={onClick}
+        disabled={loading}
+        style={{
+          background: loading ? '#F5EBD3' : 'transparent',
+          border: '1px solid #B8860B88',
+          color: '#7a5a1f',
+          padding: '0.7rem 1.75rem',
+          borderRadius: '6px',
+          fontFamily: '"Cormorant SC", serif',
+          letterSpacing: '0.18em',
+          fontSize: '0.9rem',
+          cursor: loading ? 'wait' : 'pointer',
+          transition: 'all 200ms ease',
+        }}
+      >
+        {loading ? 'YÜKLENİYOR…' : 'DAHA FAZLA ÂYET'}
+      </button>
+    </div>
+  );
+}
+
 export default function SurahWordView({ number, onBack }) {
   const meta = getSurahMeta(number);
-  const [data, setData] = useState(null);
+  const [verses, setVerses] = useState([]);
+  const [meal, setMeal] = useState(null);
+  const [loadedPage, setLoadedPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [total, setTotal] = useState(meta?.numberOfAyahs ?? 0);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [retryKey, setRetryKey] = useState(0);
 
+  // İlk yükleme: 1. sayfa kelimeler + tam meal paralel
   useEffect(() => {
     let cancelled = false;
-    setData(null);
+    setVerses([]);
+    setMeal(null);
+    setLoadedPage(0);
+    setHasMore(true);
     setError(null);
-    Promise.all([fetchSurahWords(number), fetchSurah(number)])
-      .then(([wordsData, mealData]) => {
+    setLoading(true);
+
+    Promise.all([fetchSurahWordsPage(number, 1, PAGE_SIZE), fetchSurah(number)])
+      .then(([page, mealData]) => {
         if (cancelled) return;
-        const merged = {
-          number,
-          verses: wordsData.verses.map((v, i) => ({
-            n: v.n,
-            words: v.words,
-            meal: mealData.verses[i]?.tr || '',
-          })),
-        };
-        setData(merged);
+        setVerses(page.verses);
+        setMeal(mealData);
+        setLoadedPage(1);
+        setHasMore(page.hasMore);
+        setTotal(page.total || mealData.numberOfAyahs || page.verses.length);
       })
-      .catch((e) => { if (!cancelled) setError(e.message || 'Bağlantı hatası'); });
+      .catch((e) => { if (!cancelled) setError(e.message || 'Bağlantı hatası'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
     return () => { cancelled = true; };
   }, [number, retryKey]);
 
+  const loadMore = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const next = loadedPage + 1;
+      const page = await fetchSurahWordsPage(number, next, PAGE_SIZE);
+      setVerses((prev) => [...prev, ...page.verses]);
+      setLoadedPage(next);
+      setHasMore(page.hasMore);
+    } catch (e) {
+      setError(e.message || 'Bağlantı hatası');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const showBismillah = number !== 1 && number !== 9;
+  const isInitial = verses.length === 0 && !error;
 
   return (
     <>
@@ -181,19 +248,64 @@ export default function SurahWordView({ number, onBack }) {
       {showBismillah && <Bismillah />}
 
       <main className="relative z-10">
-        {!data && !error && <Loading />}
-        {error && (
+        {isInitial && loading && <Loading />}
+        {error && verses.length === 0 && (
           <ErrorMsg
             message={error}
             onRetry={() => setRetryKey((k) => k + 1)}
           />
         )}
-        {data?.verses.map((verse, vi) => (
-          <React.Fragment key={vi}>
-            <VerseWordByWord verse={verse} />
-            {vi < data.verses.length - 1 && <Ornament />}
-          </React.Fragment>
-        ))}
+
+        {verses.map((verse, vi) => {
+          const mealText = meal?.verses[verse.n - 1]?.tr || '';
+          return (
+            <React.Fragment key={`${verse.n}-${vi}`}>
+              <VerseWordByWord
+                verse={{ ...verse, meal: mealText }}
+              />
+              {vi < verses.length - 1 && <Ornament />}
+            </React.Fragment>
+          );
+        })}
+
+        {verses.length > 0 && hasMore && (
+          <LoadMoreButton
+            onClick={loadMore}
+            loading={loading}
+            loadedCount={verses.length}
+            totalCount={total}
+          />
+        )}
+
+        {verses.length > 0 && !hasMore && (
+          <div
+            className="text-center relative z-10"
+            style={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontStyle: 'italic',
+              color: '#8a7355',
+              padding: '2.5rem 0 1rem',
+              fontSize: '0.95rem',
+            }}
+          >
+            ﴾ Sûre tamamlandı ﴿
+          </div>
+        )}
+
+        {verses.length > 0 && error && (
+          <div
+            className="text-center relative z-10"
+            style={{
+              fontFamily: '"Cormorant Garamond", serif',
+              color: '#8B2635',
+              padding: '1.5rem 0',
+              fontStyle: 'italic',
+              fontSize: '0.9rem',
+            }}
+          >
+            Sayfa yüklenemedi: {error}
+          </div>
+        )}
       </main>
     </>
   );

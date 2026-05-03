@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { alignMeal } from '../utils/alignMeal';
 
 const PALETTE = [
   '#8B2635', '#1B4965', '#2D6A4F', '#9C6644',
   '#6B2D5C', '#1A535C', '#BC4B51', '#344E41',
   '#3D348B', '#A04668', '#5C6D2E', '#7B3F00',
 ];
+
+const colorFor = (idx) => PALETTE[idx % PALETTE.length];
 
 function Medallion({ n }) {
   return (
@@ -41,7 +44,10 @@ function Medallion({ n }) {
 
 export default function VerseWordByWord({ verse }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
-  const meal = verse.meal || '';
+  const aligned = useMemo(
+    () => alignMeal(verse.meal, verse.words),
+    [verse.meal, verse.words],
+  );
 
   return (
     <article
@@ -52,116 +58,103 @@ export default function VerseWordByWord({ verse }) {
         <Medallion n={verse.n} />
       </div>
 
-      {/* RTL yönünde akan kelime çiftleri: Arapça üstte, Türkçe altta */}
+      {/* Arapça kelimeler — her biri renkli, hover'da diğerleri soluklaşır */}
       <div
         dir="rtl"
         style={{
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          gap: '0.25rem',
+          gap: '0.35rem 0.45rem',
           padding: '0 0.5rem',
+          marginBottom: '1.5rem',
         }}
       >
         {verse.words.map((word, i) => {
-          const color = PALETTE[i % PALETTE.length];
+          const color = colorFor(i);
           const active = hoveredIdx === i;
           const dimmed = hoveredIdx !== null && !active;
           return (
-            <div
+            <span
               key={i}
               style={{
-                display: 'inline-flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '0.55rem 0.5rem',
-                borderRadius: '7px',
-                cursor: 'default',
-                background: active ? `${color}18` : 'transparent',
-                border: `1px solid ${active ? `${color}55` : 'transparent'}`,
+                fontFamily: '"Amiri", serif',
+                fontSize: '1.95rem',
+                lineHeight: 1.6,
+                color,
+                padding: '0.15rem 0.4rem',
+                borderRadius: '6px',
+                background: active ? `${color}1a` : 'transparent',
+                opacity: dimmed ? 0.3 : 1,
+                textShadow: active ? `0 0 22px ${color}55` : 'none',
                 transition: 'all 180ms ease',
-                opacity: dimmed ? 0.28 : 1,
-                gap: '0.25rem',
-                minWidth: '48px',
+                cursor: 'default',
               }}
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
               onTouchStart={() => setHoveredIdx(i)}
             >
-              {/* Arapça kelime */}
-              <span
-                style={{
-                  fontFamily: '"Amiri", serif',
-                  fontSize: '1.85rem',
-                  lineHeight: 1.4,
-                  color,
-                  direction: 'rtl',
-                  textShadow: active ? `0 0 22px ${color}66` : 'none',
-                  transition: 'text-shadow 180ms ease',
-                }}
-              >
-                {word.arabic}
-              </span>
-
-              {/* Ince ayraç */}
-              <span
-                style={{
-                  display: 'block',
-                  width: '80%',
-                  height: '1px',
-                  background: `${color}55`,
-                }}
-              />
-
-              {/* Türkçe karşılık */}
-              <span
-                style={{
-                  fontFamily: '"Cormorant Garamond", serif',
-                  fontSize: '0.76rem',
-                  fontStyle: 'italic',
-                  color,
-                  textAlign: 'center',
-                  direction: 'ltr',
-                  maxWidth: '80px',
-                  lineHeight: 1.3,
-                  fontWeight: active ? 600 : 400,
-                  transition: 'font-weight 180ms ease',
-                }}
-              >
-                {word.turkish || '—'}
-              </span>
-            </div>
+              {word.arabic}
+            </span>
           );
         })}
       </div>
 
-      {meal && (
-        <>
-          <div
-            style={{
-              width: '60%',
-              height: '1px',
-              background: 'linear-gradient(to right, transparent, #B8860B44, transparent)',
-              margin: '1.25rem auto 1.1rem',
-            }}
-          />
-          <p
-            style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '1rem',
-              fontStyle: 'italic',
-              color: '#6b4f1a',
-              textAlign: 'center',
-              lineHeight: 1.7,
-              maxWidth: '640px',
-              margin: '0 auto',
-              padding: '0 1rem',
-              direction: 'ltr',
-            }}
-          >
-            {meal}
-          </p>
-        </>
+      {/* Altın hairline ayraç */}
+      {verse.meal && (
+        <div
+          style={{
+            width: '60%',
+            height: '1px',
+            background:
+              'linear-gradient(to right, transparent, #B8860B55, transparent)',
+            margin: '0.5rem auto 1rem',
+          }}
+        />
+      )}
+
+      {/* Türkçe meal — cümle sırası korunarak, her token Arapça karşılığının renginde */}
+      {verse.meal && (
+        <p
+          style={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontSize: '1.05rem',
+            fontStyle: 'italic',
+            textAlign: 'center',
+            lineHeight: 1.85,
+            maxWidth: '640px',
+            margin: '0 auto',
+            padding: '0 1rem',
+            direction: 'ltr',
+          }}
+        >
+          {aligned.map((seg, i) => {
+            const color = colorFor(seg.arabicIdx);
+            const active = hoveredIdx === seg.arabicIdx;
+            const dimmed = hoveredIdx !== null && !active;
+            return (
+              <span
+                key={i}
+                style={{
+                  color,
+                  opacity: dimmed ? 0.3 : 1,
+                  fontWeight: active ? 600 : 400,
+                  background: active ? `${color}14` : 'transparent',
+                  borderRadius: '4px',
+                  padding: '0 0.12em',
+                  marginRight: '0.18em',
+                  transition: 'all 180ms ease',
+                  cursor: 'default',
+                }}
+                onMouseEnter={() => setHoveredIdx(seg.arabicIdx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                onTouchStart={() => setHoveredIdx(seg.arabicIdx)}
+              >
+                {seg.token}
+              </span>
+            );
+          })}
+        </p>
       )}
     </article>
   );
