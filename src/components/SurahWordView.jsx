@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchSurahWords } from '../api/quranWords';
+import { fetchSurah } from '../api/quran';
 import { getSurahMeta } from '../data/surahList';
 import VerseWordByWord from './VerseWordByWord';
 import Ornament from './Ornament';
@@ -154,8 +155,19 @@ export default function SurahWordView({ number, onBack }) {
     let cancelled = false;
     setData(null);
     setError(null);
-    fetchSurahWords(number)
-      .then((d) => { if (!cancelled) setData(d); })
+    Promise.all([fetchSurahWords(number), fetchSurah(number)])
+      .then(([wordsData, mealData]) => {
+        if (cancelled) return;
+        const merged = {
+          number,
+          verses: wordsData.verses.map((v, i) => ({
+            n: v.n,
+            words: v.words,
+            meal: mealData.verses[i]?.tr || '',
+          })),
+        };
+        setData(merged);
+      })
       .catch((e) => { if (!cancelled) setError(e.message || 'Bağlantı hatası'); });
     return () => { cancelled = true; };
   }, [number, retryKey]);

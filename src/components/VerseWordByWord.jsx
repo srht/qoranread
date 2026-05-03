@@ -41,6 +41,7 @@ function Medallion({ n }) {
 
 export default function VerseWordByWord({ verse }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
+  const meal = verse.meal || '';
 
   return (
     <article
@@ -133,6 +134,35 @@ export default function VerseWordByWord({ verse }) {
           );
         })}
       </div>
+
+      {meal && (
+        <>
+          <div
+            style={{
+              width: '60%',
+              height: '1px',
+              background: 'linear-gradient(to right, transparent, #B8860B44, transparent)',
+              margin: '1.25rem auto 1.1rem',
+            }}
+          />
+          <p
+            style={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontSize: '1rem',
+              fontStyle: 'italic',
+              color: '#6b4f1a',
+              textAlign: 'center',
+              lineHeight: 1.7,
+              maxWidth: '640px',
+              margin: '0 auto',
+              padding: '0 1rem',
+              direction: 'ltr',
+            }}
+          >
+            {meal}
+          </p>
+        </>
+      )}
     </article>
   );
 }
